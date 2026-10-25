@@ -709,11 +709,11 @@ class CCTVSystem:
                     msg.attach(image)
             
             # Send email
-            server = smtplib.SMTP(email_config['smtp_server'], email_config['smtp_port'])
-            server.starttls()
-            server.login(email_config['username'], email_config['password'])
-            server.send_message(msg)
-            server.quit()
+            # Context manager closes the connection even if login/send fails
+            with smtplib.SMTP(email_config['smtp_server'], email_config['smtp_port'], timeout=30) as server:
+                server.starttls()
+                server.login(email_config['username'], email_config['password'])
+                server.send_message(msg)
             
             logger.info(f"Email alert sent for {alert['type']} event")
             
