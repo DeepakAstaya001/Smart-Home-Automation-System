@@ -25,19 +25,21 @@ import openai
 import google.generativeai as genai
 from transformers import pipeline
 import logging
+import os
 
 # Download required NLTK data
 try:
     nltk.download('punkt', quiet=True)
     nltk.download('stopwords', quiet=True)
-except:
-    pass
+except Exception as e:
+    # Offline is fine, NLTK falls back to any data already on disk
+    print(f"Could not download NLTK data: {e}")
 
 # Configuration
 class VoiceControlConfig:
-    # API Keys (Replace with your actual keys)
-    OPENAI_API_KEY = "your_openai_api_key_here"
-    GOOGLE_API_KEY = "your_google_api_key_here"
+    # API Keys are read from the environment so they never end up in git
+    OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+    GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
     
     # Network Configuration
     ESP32_IP = "192.168.1.100"  # Your ESP32 IP address
@@ -129,11 +131,11 @@ class SmartHomeVoiceAssistant:
     def setup_ai_models(self):
         try:
             # Setup OpenAI
-            if self.config.OPENAI_API_KEY != "your_openai_api_key_here":
+            if self.config.OPENAI_API_KEY:
                 openai.api_key = self.config.OPENAI_API_KEY
                 
             # Setup Google Generative AI
-            if self.config.GOOGLE_API_KEY != "your_google_api_key_here":
+            if self.config.GOOGLE_API_KEY:
                 genai.configure(api_key=self.config.GOOGLE_API_KEY)
                 
             # Setup local NLP model
