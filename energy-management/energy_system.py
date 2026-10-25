@@ -372,12 +372,22 @@ class EnergyManagementSystem:
             occupancy_count = data.get('occupancy_count', 0)
             motion_detected = data.get('motion_detected', False)
             temperature = data.get('temperature', 0.0)
+            now = datetime.now()
+            
+            # Only move last_activity forward when someone is actually there,
+            # otherwise every empty-room reading resets the idle timer
+            previous = self.occupancy_sensors.get(room, {})
+            if motion_detected or occupancy_count > 0:
+                last_activity = now
+            else:
+                last_activity = previous.get('last_activity', now)
             
             self.occupancy_sensors[room] = {
                 'occupancy_count': occupancy_count,
                 'motion_detected': motion_detected,
                 'temperature': temperature,
-                'timestamp': datetime.now()
+                'timestamp': now,
+                'last_activity': last_activity
             }
             
             # Store in database
@@ -595,8 +605,8 @@ class EnergyManagementSystem:
                             self.control_device(device['id'], False)
                     else:
                         # Turn off fan if room unoccupied for > 10 minutes
-                        last_activity = occupancy.get('timestamp', datetime.now())
-                        if (datetime.now() - last_activity).seconds > 600:
+                        last_activity = occupancy.get('last_activity', datetime.now())
+                        if (datetime.now() - last_activity).total_seconds() > 600:
                             self.control_device(device['id'], False)
                             self.log_optimization('occupancy_based', device['id'], 'fan_auto_off')
                             
