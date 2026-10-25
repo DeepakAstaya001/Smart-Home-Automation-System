@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Box, useTheme } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -24,7 +24,22 @@ import { useWebSocket } from './contexts/WebSocketContext';
 // Services
 import { authService } from './services/authService';
 
+// Shared enter/exit animation for every routed page
+function PageTransition({ children }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 function App() {
+  const location = useLocation();
   const theme = useTheme();
   const { isAuthenticated, loading } = useAuth();
   const { connected } = useWebSocket();
@@ -108,85 +123,14 @@ function App() {
           }}
         >
           <AnimatePresence mode="wait">
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Dashboard />
-                  </motion.div>
-                }
-              />
-              <Route
-                path="/devices"
-                element={
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <DeviceControl />
-                  </motion.div>
-                }
-              />
-              <Route
-                path="/security"
-                element={
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <SecurityCenter />
-                  </motion.div>
-                }
-              />
-              <Route
-                path="/energy"
-                element={
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <EnergyManagement />
-                  </motion.div>
-                }
-              />
-              <Route
-                path="/analytics"
-                element={
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Analytics />
-                  </motion.div>
-                }
-              />
-              <Route
-                path="/settings"
-                element={
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Settings />
-                  </motion.div>
-                }
-              />
+            {/* Routes must be keyed by location so AnimatePresence can run exit animations */}
+            <Routes location={location} key={location.pathname}>
+              <Route path="/" element={<PageTransition><Dashboard /></PageTransition>} />
+              <Route path="/devices" element={<PageTransition><DeviceControl /></PageTransition>} />
+              <Route path="/security" element={<PageTransition><SecurityCenter /></PageTransition>} />
+              <Route path="/energy" element={<PageTransition><EnergyManagement /></PageTransition>} />
+              <Route path="/analytics" element={<PageTransition><Analytics /></PageTransition>} />
+              <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </AnimatePresence>
