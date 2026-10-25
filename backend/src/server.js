@@ -9,7 +9,7 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const redis = require('redis');
 const session = require('express-session');
-const RedisStore = require('connect-redis')(session);
+const RedisStore = require('connect-redis').default;
 const jwt = require('jsonwebtoken');
 const cron = require('node-cron');
 
@@ -98,10 +98,7 @@ class SmartHomeServer {
 
     async initializeDatabase() {
         try {
-            await mongoose.connect(config.database.mongodb.uri, {
-                useNewUrlParser: true,
-                useUnifiedTopology: true,
-            });
+            await mongoose.connect(config.database.mongodb.uri);
             logger.info('Connected to MongoDB');
         } catch (error) {
             logger.error('MongoDB connection error:', error);
@@ -111,12 +108,20 @@ class SmartHomeServer {
 
     async initializeRedis() {
         try {
+            // node-redis v4 expects host/port under `socket`; top-level
+            // host/port are ignored and it silently falls back to localhost
             this.redisClient = redis.createClient({
-                host: config.database.redis.host,
-                port: config.database.redis.port,
+                socket: {
+                    host: config.database.redis.host,
+                    port: config.database.redis.port,
+                },
                 password: config.database.redis.password,
             });
-            
+
+            this.redisClient.on('error', (error) => {
+                logger.error('Redis client error:', error);
+            });
+
             await this.redisClient.connect();
             logger.info('Connected to Redis');
         } catch (error) {
