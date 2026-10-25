@@ -396,13 +396,18 @@ void webSocket_event(uint8_t num, WStype_t type, uint8_t * payload, size_t lengt
             
         case WStype_TEXT:
             {
-                String command = String((char*)payload);
-                Serial.printf("[%u] Received: %s\n", num, command.c_str());
-                
-                // Parse JSON command
+                Serial.printf("[%u] Received: %.*s\n", num, (int)length, (char*)payload);
+
+                // Parse JSON command using the frame length, payload isn't
+                // guaranteed to be null-terminated
                 DynamicJsonDocument doc(1024);
-                deserializeJson(doc, command);
-                
+                DeserializationError error = deserializeJson(doc, payload, length);
+                if (error) {
+                    Serial.printf("[%u] Invalid JSON: %s\n", num, error.c_str());
+                    webSocket.sendTXT(num, "{\"error\":\"invalid json\"}");
+                    break;
+                }
+
                 if (doc.containsKey("command")) {
                     String cmd = doc["command"];
                     String value = doc.containsKey("value") ? doc["value"] : "";
@@ -430,8 +435,13 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
     
     // Parse MQTT commands
     DynamicJsonDocument doc(1024);
-    deserializeJson(doc, message);
-    
+    DeserializationError error = deserializeJson(doc, message);
+    if (error) {
+        Serial.print("Invalid MQTT JSON: ");
+        Serial.println(error.c_str());
+        return;
+    }
+
     if (doc.containsKey("command")) {
         String command = doc["command"];
         String value = doc.containsKey("value") ? doc["value"] : "";
