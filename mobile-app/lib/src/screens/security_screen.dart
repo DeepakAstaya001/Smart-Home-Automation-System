@@ -45,11 +45,15 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen>
   }
 
   Future<void> _performBiometricAuth() async {
+    // Ignore repeat taps while a scan is already in progress
+    if (_isScanning) return;
     setState(() => _isScanning = true);
     _scanAnimationController.repeat();
-    
+
     try {
       final isAuthenticated = await BiometricService.instance.authenticate();
+      // User may have left the screen while the biometric prompt was open
+      if (!mounted) return;
       if (isAuthenticated) {
         ref.read(securityProvider.notifier).toggleSecuritySystem();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -57,12 +61,16 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen>
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Authentication failed: $e')),
       );
     } finally {
-      setState(() => _isScanning = false);
-      _scanAnimationController.stop();
+      // Controller is disposed with the widget, so only touch it while mounted
+      if (mounted) {
+        setState(() => _isScanning = false);
+        _scanAnimationController.stop();
+      }
     }
   }
 
