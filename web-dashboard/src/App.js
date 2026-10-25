@@ -54,7 +54,7 @@ function App() {
       } catch (error) {
         console.error('App initialization error:', error);
       } finally {
-        setTimeout(() => setInitialLoading(false), 1500);
+        setInitialLoading(false);
       }
     };
 
@@ -65,7 +65,8 @@ function App() {
     setSidebarOpen(!sidebarOpen);
   };
 
-  if (initialLoading) {
+  // Wait for the auth check instead of a fixed splash delay
+  if (initialLoading || loading) {
     return <LoadingScreen />;
   }
 
