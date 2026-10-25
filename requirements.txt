@@ -1,0 +1,4 @@
+# Dependencies for the root voice control script (smarthome.py)
+SpeechRecognition>=3.10
+pyserial>=3.5
+PyAudio>=0.2.13

@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Node
+node_modules/
+build/
+dist/
+npm-debug.log*
+
+# Flutter / Dart
+.dart_tool/
+.packages
+mobile-app/build/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
