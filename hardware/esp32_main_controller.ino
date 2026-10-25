@@ -241,9 +241,11 @@ void loop() {
     handle_security();
     handle_auto_mode();
     
+    // Commands are newline-terminated; readString() would block the whole
+    // loop (including security checks) for its 1s timeout on every command
     // Handle Bluetooth commands
     if (SerialBT.available()) {
-        String bt_command = SerialBT.readString();
+        String bt_command = SerialBT.readStringUntil('\n');
         bt_command.trim();
         execute_command(bt_command);
         SerialBT.println("Command executed: " + bt_command);
@@ -251,7 +253,7 @@ void loop() {
     
     // Handle Serial commands
     if (Serial.available()) {
-        String serial_command = Serial.readString();
+        String serial_command = Serial.readStringUntil('\n');
         serial_command.trim();
         execute_command(serial_command);
         Serial.println("Command executed: " + serial_command);
