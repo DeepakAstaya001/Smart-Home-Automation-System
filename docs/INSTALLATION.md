@@ -241,9 +241,13 @@ SMTP_PORT=587
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
 
-# Voice Service Configuration
+# Voice Service Configuration (read by voice-control/voice_assistant.py)
 OPENAI_API_KEY=your-openai-key
-GOOGLE_SPEECH_API_KEY=your-google-key
+GOOGLE_API_KEY=your-google-key
+
+# Arduino serial link (read by smarthome.py)
+ARDUINO_PORT=COM3          # e.g. /dev/ttyUSB0 or /dev/ttyACM0 on Linux
+ARDUINO_BAUD=9600
 
 # Camera Configuration
 RTSP_STREAMS=rtsp://camera1:554/stream,rtsp://camera2:554/stream
