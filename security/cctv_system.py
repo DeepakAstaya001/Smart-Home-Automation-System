@@ -32,9 +32,9 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 import face_recognition
 import smtplib
-from email.mime.text import MimeText
-from email.mime.multipart import MimeMultipart
-from email.mime.image import MimeImage
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
 import paho.mqtt.client as mqtt
 from flask import Flask, Response, jsonify, render_template_string
 from flask_socketio import SocketIO, emit
@@ -681,7 +681,7 @@ class CCTVSystem:
         try:
             email_config = self.config['alerts']['email']
             
-            msg = MimeMultipart()
+            msg = MIMEMultipart()
             msg['From'] = email_config['username']
             msg['To'] = ', '.join(email_config['recipients'])
             msg['Subject'] = f"Smart Home Security Alert - {alert['type'].title()}"
@@ -697,13 +697,13 @@ class CCTVSystem:
             Details: {alert.get('description', 'Event detected')}
             """
             
-            msg.attach(MimeText(body, 'plain'))
+            msg.attach(MIMEText(body, 'plain'))
             
             # Attach image if available
             if 'image_path' in alert and os.path.exists(alert['image_path']):
                 with open(alert['image_path'], 'rb') as f:
                     img_data = f.read()
-                    image = MimeImage(img_data)
+                    image = MIMEImage(img_data)
                     image.add_header('Content-Disposition', 'attachment', 
                                    filename='alert_image.jpg')
                     msg.attach(image)
