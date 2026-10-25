@@ -488,6 +488,26 @@ python scripts/test_speech_recognition.py
    engine.setProperty('voice', voices[0].id)
    ```
 
+#### Problem: Commands recognized but Arduino/ESP32 doesn't react
+**Symptoms:**
+- `smarthome.py` prints "Sent command to Arduino" but nothing switches
+- Commands typed in the Serial Monitor are ignored or only run after a delay
+
+**Solutions:**
+1. **Use newline-terminated commands**: the firmware reads one command per
+   line (`readStringUntil('\n')`). In the Arduino IDE Serial Monitor set the
+   line ending dropdown to **Newline** or **Both NL & CR**.
+2. **Check the serial port**: set the right port instead of the default `COM3`:
+   ```bash
+   # Windows
+   set ARDUINO_PORT=COM5
+   # Linux / macOS
+   export ARDUINO_PORT=/dev/ttyUSB0
+   python smarthome.py
+   ```
+3. **Close other serial apps**: only one program can hold the port, so close
+   the Serial Monitor before running `smarthome.py`.
+
 ### Security System Issues
 
 #### Problem: Face recognition not accurate
