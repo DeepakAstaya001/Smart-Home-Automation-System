@@ -8,8 +8,9 @@ time.sleep(2)  # Wait for the connection to be established
 
 # Function to send commands to Arduino
 def send_to_arduino(command):
-    arduino.write(command.encode())
-    time.sleep(1)  # Give Arduino time to process the command
+    # Newline-terminate so the Arduino parses the command immediately
+    arduino.write((command + "\n").encode())
+    arduino.flush()
 
 # Initialize the recognizer
 recognizer = sr.Recognizer()

@@ -17,6 +17,7 @@ Servo hallDoor, kitchenDoor, livingRoomDoor;
 void setup() {
   // Initialize the serial communication
   Serial.begin(9600);
+  Serial.setTimeout(50);  // Fallback timeout in case a newline is missing
   delay(2000);  // Give time for the serial connection to establish
 
   // Set up pins for lights and fans
@@ -43,7 +44,7 @@ void setup() {
 
 void loop() {
   if (Serial.available() > 0) {
-    String command = Serial.readString();  // Read the command from the serial port
+    String command = Serial.readStringUntil('\n');  // Read one newline-terminated command
     command.trim();  // Remove any extra whitespace
 
     // Check for door commands
